@@ -1,0 +1,298 @@
+Azure OpenAI
+
+Use environment variables and the official SDK. Support both ChatCompletions and Responses API; default to ChatCompletions.
+
+CORS enabled for http://localhost:5173 (Vite) and Replit preview origin.
+
+backend/requirements.txt
+Flask==3.0.3
+flask-cors==4.0.0
+python-dotenv==1.0.1
+crewai==0.51.1
+crewai-tools==0.8.0
+openai==1.54.3
+markdown==3.7
+beautifulsoup4==4.12.3
+numpy==1.26.4
+scikit-learn==1.5.2
+tiktoken==0.7.0
+
+backend/.env.example
+AZURE_OPENAI_API_KEY=replace_me
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_OPENAI_API_VERSION=2024-08-01-preview
+AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini # or your deployed name
+AZURE_OPENAI_EMBED_DEPLOYMENT=text-embedding-3-large
+
+backend/app.py (key points)
+
+Load .env.
+
+On startup, parse data/cv.md, build embeddings, and keep an in-memory FAISS-like index (you can emulate with sklearn cosine similarity).
+
+Implement endpoints described above.
+
+CrewAI: create agents and tasks in crew/agents.py & crew/tasks.py; tools in crew/tools.py call the retriever.
+
+Suggested questions per section (backend)
+
+Provide a small dictionary of 5–8 questions per section (e.g., “Experience”: “What impact did you deliver at IOM?”, “How did you apply DevOps practices?” etc.). Return these from /api/questions.
+
+Frontend details (React Native Web + Vite)
+
+Use react-native, react-native-web, react-native-paper (material components w/ dark mode), and @tanstack/react-query.
+
+Light/Dark mode: toggle in header; persist in localStorage.
+
+Layout
+
+Header: title, theme toggle.
+
+Main grid: left—scrollable Section Cards (one per CV section) with “Ask this” question chips; right—Chat panel showing conversation and a text input with “Ask” button.
+
+API client in src/lib/api.ts for the Flask routes.
+
+TypeScript throughout.
+
+frontend/package.json (essential deps)
+{
+  "name": "cv-chatbot-rnweb",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.51.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-native": "0.74.3",
+    "react-native-paper": "^5.12.5",
+    "react-native-web": "^0.19.13"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  }
+}
+
+Frontend UX rules
+
+Card for each section: title, short excerpt, list of question chips → clicking a chip posts to /api/ask with section.
+
+Chat bubbles: user vs assistant, last message streaming (optional). Show Citations: Section, Subsection under assistant messages.
+
+Keep spacing generous, shadows soft, rounded corners; no heavy colors.
+
+README tasks (what to implement)
+
+Backend
+
+Implement loader.py to parse and normalize headings from data/cv.md.
+
+Implement retriever.py with embedding index and search(query, section?).
+
+Implement agents.py (Router, RAG, Refiner) using CrewAI; inject retrieved context into prompts.
+
+Implement tasks.py composing the agents.
+
+Implement app.py with Flask routes, CORS, and error handling.
+
+Frontend
+
+Configure react-native-web with Vite; add App.tsx grid layout (cards left, chat right).
+
+Build SectionCard.tsx, QuestionList.tsx, Chat.tsx, Header.tsx.
+
+Theme provider with dark/light support; toggle in header.
+
+Data fetching via React Query; optimistic UI when sending a question.
+
+Env & Run
+
+Copy backend/.env.example → backend/.env and fill Azure OpenAI values.
+
+Dev commands: run backend on :8000, frontend on :5173.
+
+Ensure CORS allows the frontend origin.
+
+Quality bar / Acceptance criteria
+
+App loads sections from /api/sections.
+
+Clicking any suggested question yields an answer within 2–5s and shows citations.
+
+Free-form questions work and remain grounded; if info not in CV, politely respond “Not found in CV.”
+
+Light/dark mode persists.
+
+No PII leaks beyond what’s in cv.md. No tool calls outside RAG.
+
+Sample data/cv.md
+
+Use exactly this content in backend/data/cv.md (keep headings and spacing):
+
+# Mohammed Alakhras
+
+**Senior AI Engineer**  
+Valencia, Spain  
+md.alakhras@gmail.com | (555) 123-4567
+
+## Summary
+
+Information management expert with extensive knowledge in managing data and building solutions, demonstrates solid and up to date technical skills in AI and BI, in the last 10 years, fully engaged in building information management systems with UN agencies, and have been many years part of digital transformation activities focusing on build, deliver and manage software project using different platforms applying DevOps standards, with a great experiences in hybrid high/low code solutions.
+
+## Experience
+
+- **Software Development Technical Lead / AI** at **IOM** — 2023-Present
+ • Build AI and Data solutions for ICT – Data (AI Agents) for HR, Admin Office
+ • Supporting development teams in enhancing application code quality using DevOps.
+ • Assessment and improving solutions architecture.
+ • Maintain Product Backlog and ensure DevOps/Agile practices applied properly during the development    lifecycle for ICT teams globally.
+
+- **ICT DevOps Engineer** at **IOM** — 2022-2023
+  Support .Net and ICT to support MiMOSA business Users globally.
+  Build Azure DevOps pipelines for different technologies
+  Integrate TestComplete Projects to Azure Pipelines
+  Work Closely with InfoSec team to automate SAST (Sonar Cloud, Sonar Lint, etc..)
+
+- **Field Applications Officer** at **UNRWA** — 2019-2022
+  Manage and control UNRWA business engagement for business partners in Gaza field (HR,
+  Health, Relief and Social Services, Procurement and logistics and Education, Shelter
+  management) in Gaza field.
+  Manage and lead improvement plans to enhance already built UNRWA applications (field
+  applications and systems) to be compatible with international software products standards as well
+  as IMTD in UNRWA HQA standards for (quality assurance, design, system’s architecture and
+  information security).
+  Manage field applications emergency change requests and lead development teams especially in
+  COVID-19 pandemic, which reflect changes to all operations UNRWA staff doing (food
+  distribution, in-kind donations, and health services).
+  Manage applying cloud services from Microsoft to replace on premise services such as utilizing
+  office 365 products such as (SharePoint, Power Apps) to enhance staff engagement and
+  awareness as well as replace on premise sharing by a cloud sharing using SharePoint.
+
+- **Analyst Programmer team lead** at **UNRWA** — 2018-2019
+  Manage professional development team members.
+  Manage and lead development team to build enterprise systems for UNRWA, used within 5
+  countries to the agency.
+  Follow up and apply QA and QC standards in development using different methodologies.
+  Lead building access control system and apply zone management Project to UNRWA compounds.
+  Manage and participate to enhance newly build data collection tool serves UNRWA departments
+  across 5 countries, used to build dynamic surveys with dynamic privileges to users, which include
+  using complex different types of questions with integration ability to different system.
+
+- **Developer** at **CDH Rafah** — 2018-2019
+  Design and implement of admission and registration system for University College.
+
+## Skills
+
+React, Node.js, TypeScript, Python, JavaScript, AWS, Docker, PostgreSQL, MongoDB, Redux, Next.js, Tailwind CSS, Jest, Git, GraphQL, REST APIs, Microservices, Agile/Scrum, DevOps, CI/CD, Unit Testing, Integration Testing, System Design, Cloud Computing (AWS, Azure), Data Analysis, Machine Learning
+
+## Certificates
+
+- AWS Certified Developer Associate
+- React Professional Certificate (Meta)
+- Node.js Application Developer Certification
+- Google Cloud Professional Cloud Architect
+
+## Languages
+
+- **English** — Native
+  Native speaker with excellent written and verbal communication skills
+- **Spanish** — Conversational  
+  Learned through travel and practice over 5 years, comfortable in professional settings
+- **French** — Basic
+  Self-taught using online resources and language exchange programs
+
+## Memberships
+
+- IEEE Computer Society
+- React Developer Community
+
+## References
+
+Name: Emmanuel Mugarura
+Address: Kampala, Uganda
+Email: e.mugarura@unrwa.org
+Title: IS Project Leader.
+Agency: UNRWA
+
+Name: Nicholas Gan
+Address: Amman, Jordan
+Title: SW Manager / Head Applications Section.
+Agency: IOM/UNRWA
+
+Name: Pavel Sorin
+Address: Valencia, Spain
+Title: Software Delivery Officer.
+Agency: IOM
+
+# Your Name
+
+Senior Software Engineer
+
+## Contact Information
+- Location: City, Country
+- Email: your.email@example.com
+- Phone: +1234567890
+
+## Professional Summary
+Experienced software engineer with expertise in full-stack development, cloud technologies, and modern web frameworks. Passionate about building scalable applications and leading development teams.
+
+## Experience
+
+### Senior Software Engineer - Tech Company
+*2021 - Present*
+- Led development of React-based applications serving thousands of users
+- Implemented modern state management solutions and performance optimizations
+- Collaborated with cross-functional teams to deliver high-quality software solutions
+
+### Full Stack Developer - Previous Company  
+*2019 - 2021*
+- Built and maintained web applications using Node.js, Express, and React
+- Implemented CI/CD pipelines and automated testing strategies
+- Worked with databases and cloud infrastructure
+
+## Skills
+React, Node.js, TypeScript, Python, AWS, Docker, PostgreSQL, MongoDB, Git, Jenkins
+
+## Certificates
+- AWS Certified Developer
+- React Professional Certificate  
+- Node.js Application Developer
+
+## Languages
+- English - Native
+- Spanish - Conversational  
+- French - Basic
+
+## Memberships
+- IEEE Computer Society
+- Local Developer Community
+- Tech Professional Association
+
+Dev commands
+
+Backend: cd backend && python app.py (or flask run --port 8000)
+
+Frontend: cd frontend && npm i && npm run dev
+
+The app should run with frontend at http://localhost:5173 talking to backend http://localhost:8000.
+
+Testing checklist
+
+ /api/sections returns all top-level sections from cv.md.
+
+ Clicking a suggested question posts to /api/ask and returns an answer with citations.
+
+ Free-form user input works; when info isn’t present in cv.md, the bot says it can’t find it and suggests the nearest section.
+
+ Light/dark toggle persists.
+
+ CrewAI chain runs without blocking the server, with clear logs.
+
+Please generate all necessary code files and comments inline so I can run immediately on Replit.
