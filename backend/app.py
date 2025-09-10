@@ -13,8 +13,6 @@ sys.path.insert(0, str(backend_dir))
 from loader import CVLoader
 from retriever import CVRetriever
 from crew.agents import create_agents
-from crew.tasks import create_tasks
-from crewai import Crew
 
 # Load environment variables
 load_dotenv()
@@ -178,41 +176,20 @@ def ask_question():
         
         logger.info(f"Processing question: {question} (section: {section})")
         
-        # Create tasks for this question
-        tasks = create_tasks(agents, question, section)
-        
-        # Check if we have LLM capabilities by testing if agents have LLM configured
-        has_llm = False
+        # Use the researcher agent to process the query
         try:
-            # Check if any agent has an LLM configured
-            for agent in agents.values():
-                if hasattr(agent, 'llm') and agent.llm is not None:
-                    has_llm = True
-                    break
-        except Exception:
-            has_llm = False
-        
-        if has_llm:
-            try:
-                # Create and run the crew with LLM
-                crew = Crew(
-                    agents=list(agents.values()),
-                    tasks=list(tasks.values()),
-                    verbose=True
-                )
-                
-                # Execute the crew
-                result = crew.kickoff()
-            except Exception as e:
-                logger.error(f"Error running CrewAI: {e}")
-                # Fallback to retriever
-                has_llm = False
-        
-        if not has_llm:
-            # Fallback: use retriever directly when no LLM is available
-            logger.info("Using retriever fallback mode")
-            context = retriever.get_context_for_query(question, section)
+            researcher = agents['researcher']
+            result = researcher.process_query(question, section)
             
+            if not result or "couldn't find specific information" in result:
+                result = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
+            else:
+                result = f"Based on the CV information:\n\n{result}"
+                
+        except Exception as e:
+            logger.error(f"Error processing with agent: {e}")
+            # Direct retriever fallback
+            context = retriever.get_context_for_query(question, section)
             if not context or context.strip() == "No relevant information found in the CV.":
                 result = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
             else:
