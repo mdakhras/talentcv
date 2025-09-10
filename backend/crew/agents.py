@@ -38,18 +38,34 @@ def create_agents(retriever: CVRetriever):
         return create_simple_agents(retriever)
     
     try:
-        # Try to use OpenAI if available and LLM class is available
+        # Try to use Azure OpenAI if available and LLM class is available
         llm = None
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = os.getenv('AZURE_OPENAI_API_KEY')
+        azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        api_version = os.getenv('AZURE_OPENAI_API_VERSION', '2024-08-01-preview')
+        deployment_name = os.getenv('AZURE_OPENAI_DEPLOYMENT', 'gpt-35-turbo')
         
-        if CREWAI_LLM_AVAILABLE and api_key:
+        # LLM settings
+        llm_settings = {
+            "temperature": 0,
+            "max_tokens": 4000,
+            "timeout_seconds": 120
+        }
+        
+        if CREWAI_LLM_AVAILABLE and api_key and azure_endpoint:
             try:
                 llm = LLM(
-                    model="gpt-3.5-turbo",
-                    api_key=api_key
+                    model=f"azure/{deployment_name}",
+                    api_key=api_key,
+                    base_url=azure_endpoint,
+                    api_version=api_version,
+                    temperature=llm_settings.get("temperature", 0),
+                    max_tokens=llm_settings.get("max_tokens", 4000),
+                    timeout=llm_settings.get("timeout_seconds", 120)
                 )
+                print(f"Azure LLM initialized successfully with deployment: {deployment_name}")
             except Exception as e:
-                print(f"LLM initialization failed: {e}")
+                print(f"Azure LLM initialization failed: {e}")
                 llm = None
         
         # If LLM initialization failed, use simple agents
