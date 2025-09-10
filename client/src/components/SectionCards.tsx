@@ -108,6 +108,86 @@ export default function SectionCards({ onQuestionClick }: SectionCardsProps) {
 
   return (
     <div className="space-y-4 overflow-y-auto chat-scroll pr-2">
+      {/* Profile Overview Card */}
+      <Card className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+        <CardContent className="p-0">
+          <div className="flex items-start space-x-4">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-primary/10 border-3 border-primary/30 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/api/placeholder/80/80" 
+                  alt="Mohammed Alakhras" 
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl" style={{display: 'none'}}>
+                  MA
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-card-foreground mb-1">Mohammed Alakhras</h3>
+              <p className="text-primary font-medium mb-2">Senior Information Management Officer</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Experienced professional with expertise in information management, data analysis, and system administration.
+              </p>
+              
+              <div className="flex flex-wrap gap-3 text-xs">
+                <div className="flex items-center space-x-1">
+                  <i className="fas fa-map-marker-alt text-primary"></i>
+                  <span>Amman, Jordan</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <i className="fas fa-briefcase text-primary"></i>
+                  <span>8+ years experience</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <i className="fas fa-graduation-cap text-primary"></i>
+                  <span>Master's degree</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-primary/20">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Quick Actions</p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="px-3 py-1.5 text-sm"
+                onClick={() => onQuestionClick("Tell me about your background and experience", "Summary")}
+              >
+                <i className="fas fa-user mr-2"></i>
+                About Me
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="px-3 py-1.5 text-sm"
+                onClick={() => onQuestionClick("What are your key technical skills?", "Skills")}
+              >
+                <i className="fas fa-code mr-2"></i>
+                Skills
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="px-3 py-1.5 text-sm"
+                onClick={() => onQuestionClick("What is your recent work experience?", "Experience")}
+              >
+                <i className="fas fa-briefcase mr-2"></i>
+                Experience
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-card-foreground mb-2">CV Sections</h2>
         <p className="text-muted-foreground">Browse different sections of the CV and ask questions</p>

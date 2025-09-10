@@ -19,7 +19,7 @@ export default function Home() {
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-120px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
           <SectionCards onQuestionClick={handleQuestionClick} />
           <ChatPanel 
             pendingQuestion={pendingQuestion}

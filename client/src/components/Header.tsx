@@ -20,7 +20,7 @@ export default function Header() {
               <p className="text-sm text-muted-foreground">Interactive Resume Assistant</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <button 
               onClick={toggleTheme}
@@ -40,7 +40,7 @@ export default function Header() {
                 } text-xs flex items-center justify-center h-full`}></i>
               </span>
             </button>
-            
+
             <div className="text-sm text-muted-foreground">
               <span>Mohammed Alakhras</span>
             </div>
