@@ -3,13 +3,18 @@ try:
     from crewai import Agent
     # Try to import LLM - handle different CrewAI versions
     try:
-        from crewai import LLM
-        CREWAI_LLM_AVAILABLE = True
-    except ImportError:
         from crewai.llm import LLM
         CREWAI_LLM_AVAILABLE = True
     except ImportError:
-        CREWAI_LLM_AVAILABLE = False
+        try:
+            from crewai import LLM
+            CREWAI_LLM_AVAILABLE = True
+        except ImportError:
+            try:
+                from crewai.utilities.token_counter_callback import LLM
+                CREWAI_LLM_AVAILABLE = True
+            except ImportError:
+                CREWAI_LLM_AVAILABLE = False
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
