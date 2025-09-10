@@ -48,6 +48,10 @@ def initialize_cv_system():
         cv_path = os.path.join(backend_dir, 'data', 'cv.md')
         logger.info(f"Loading CV from: {cv_path}")
         
+        if not os.path.exists(cv_path):
+            logger.error(f"CV file not found: {cv_path}")
+            return False
+        
         cv_loader = CVLoader(cv_path)
         cv_loader.load_content()
         
@@ -55,11 +59,15 @@ def initialize_cv_system():
         chunks = cv_loader.get_chunks_for_embedding()
         logger.info(f"Created {len(chunks)} chunks from CV")
         
+        if not chunks:
+            logger.error("No chunks created from CV")
+            return False
+        
         # Initialize retriever
         retriever = CVRetriever(chunks)
         logger.info("CV retriever initialized")
         
-        # Create agents
+        # Create agents (this should work even without Azure OpenAI)
         agents = create_agents(retriever)
         logger.info("CrewAI agents created")
         
@@ -67,6 +75,8 @@ def initialize_cv_system():
         
     except Exception as e:
         logger.error(f"Failed to initialize CV system: {e}")
+        import traceback
+        logger.error(f"Full traceback: {traceback.format_exc()}")
         return False
 
 # Suggested questions for each section
@@ -171,22 +181,36 @@ def ask_question():
         # Create tasks for this question
         tasks = create_tasks(agents, question, section)
         
-        # Check if we have LLM capabilities
-        has_llm = bool(os.getenv('AZURE_OPENAI_API_KEY') and os.getenv('AZURE_OPENAI_ENDPOINT'))
+        # Check if we have LLM capabilities by testing if agents have LLM configured
+        has_llm = False
+        try:
+            # Check if any agent has an LLM configured
+            for agent in agents.values():
+                if hasattr(agent, 'llm') and agent.llm is not None:
+                    has_llm = True
+                    break
+        except Exception:
+            has_llm = False
         
         if has_llm:
-            # Create and run the crew with LLM
-            crew = Crew(
-                agents=list(agents.values()),
-                tasks=list(tasks.values()),
-                verbose=True
-            )
-            
-            # Execute the crew
-            result = crew.kickoff()
-        else:
+            try:
+                # Create and run the crew with LLM
+                crew = Crew(
+                    agents=list(agents.values()),
+                    tasks=list(tasks.values()),
+                    verbose=True
+                )
+                
+                # Execute the crew
+                result = crew.kickoff()
+            except Exception as e:
+                logger.error(f"Error running CrewAI: {e}")
+                # Fallback to retriever
+                has_llm = False
+        
+        if not has_llm:
             # Fallback: use retriever directly when no LLM is available
-            logger.info("No LLM available, using retriever fallback")
+            logger.info("Using retriever fallback mode")
             context = retriever.get_context_for_query(question, section)
             
             if not context or context.strip() == "No relevant information found in the CV.":
