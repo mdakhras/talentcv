@@ -1,3 +1,4 @@
+
 import os
 import sys
 import logging
@@ -13,6 +14,14 @@ sys.path.insert(0, str(backend_dir))
 from loader import CVLoader
 from retriever import CVRetriever
 from crew.agents import create_agents
+from crew.tasks import create_tasks
+
+# Check if CrewAI is available
+try:
+    from crewai import Crew
+    CREWAI_AVAILABLE = True
+except ImportError:
+    CREWAI_AVAILABLE = False
 
 # Load environment variables
 load_dotenv()
@@ -65,9 +74,9 @@ def initialize_cv_system():
         retriever = CVRetriever(chunks)
         logger.info("CV retriever initialized")
         
-        # Create agents (this should work even without Azure OpenAI)
+        # Create agents
         agents = create_agents(retriever)
-        logger.info("CrewAI agents created")
+        logger.info("CV agents created")
         
         return True
         
@@ -176,47 +185,47 @@ def ask_question():
         
         logger.info(f"Processing question: {question} (section: {section})")
         
-        # Use the researcher agent to process the query
-        try:
-            researcher = agents['researcher']
-            result = researcher.process_query(question, section)
-            
-            if not result or "couldn't find specific information" in result:
-                result = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
-            else:
-                result = f"Based on the CV information:\n\n{result}"
+        # Try to use CrewAI if available
+        if CREWAI_AVAILABLE and hasattr(agents['researcher'], 'tools'):
+            try:
+                # Create tasks
+                tasks = create_tasks(agents, question, section)
                 
-        except Exception as e:
-            logger.error(f"Error processing with agent: {e}")
-            # Direct retriever fallback
-            context = retriever.get_context_for_query(question, section)
-            if not context or context.strip() == "No relevant information found in the CV.":
-                result = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
-            else:
-                result = f"Based on the CV information:\n\n{context}"
+                # Create crew
+                crew = Crew(
+                    agents=[agents['researcher'], agents['analyst']],
+                    tasks=[tasks['research'], tasks['analysis']],
+                    verbose=True
+                )
+                
+                # Execute crew
+                result = crew.kickoff()
+                answer = str(result)
+                
+            except Exception as e:
+                logger.error(f"CrewAI execution failed: {e}")
+                # Fallback to simple agent processing
+                researcher = agents['researcher']
+                answer = researcher.process_query(question, section)
+        else:
+            # Use simple agent processing
+            researcher = agents['researcher']
+            answer = researcher.process_query(question, section)
         
-        # Parse the result to extract answer and citations
-        answer = str(result)
+        if not answer or "couldn't find specific information" in answer:
+            answer = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
+        else:
+            answer = f"Based on the CV information:\n\n{answer}"
+        
+        # Generate citations
         citations = []
+        relevant_chunks = retriever.search(question, section, top_k=3)
+        seen_sections = set()
         
-        # Try to extract citations from the response
-        if "Citations:" in answer:
-            parts = answer.split("Citations:")
-            if len(parts) > 1:
-                citation_text = parts[1].strip()
-                # Extract section names from citation text
-                for section_name in SECTION_QUESTIONS.keys():
-                    if section_name.lower() in citation_text.lower():
-                        citations.append({"section": section_name})
-        
-        # If no citations found, try to infer from retrieved chunks
-        if not citations:
-            relevant_chunks = retriever.search(question, section, top_k=3)
-            seen_sections = set()
-            for chunk in relevant_chunks:
-                if chunk['section'] not in seen_sections:
-                    citations.append({"section": chunk['section']})
-                    seen_sections.add(chunk['section'])
+        for chunk in relevant_chunks:
+            if chunk['section'] not in seen_sections:
+                citations.append({"section": chunk['section']})
+                seen_sections.add(chunk['section'])
         
         response = {
             "answer": answer,
@@ -252,6 +261,6 @@ if __name__ == '__main__':
     
     logger.info("CV system initialized successfully")
     
-    # Start the Flask app
+    # Start the Flask app on port 8000 to avoid conflicts
     port = int(os.environ.get('PORT', 8000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)

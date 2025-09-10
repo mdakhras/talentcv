@@ -1,4 +1,6 @@
 
+from crewai import Agent, LLM
+from crew.tools import cv_search, cv_sections, cv_content, set_retriever
 from retriever import CVRetriever
 import os
 from dotenv import load_dotenv
@@ -6,16 +8,75 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def create_agents(retriever: CVRetriever):
-    """Create a simple agent system for CV question answering without crewai dependency."""
+    """Create CrewAI agents for CV question answering."""
     
-    # Simple agent class that doesn't depend on crewai
+    # Set the global retriever for tools
+    set_retriever(retriever)
+    
+    try:
+        # Try to use OpenAI if available, otherwise use a simple fallback
+        api_key = os.getenv('OPENAI_API_KEY')
+        if api_key:
+            llm = LLM(
+                model="gpt-3.5-turbo",
+                api_key=api_key
+            )
+        else:
+            # Use a simple LLM configuration for local development
+            llm = LLM(model="ollama/llama2", base_url="http://localhost:11434")
+    except Exception as e:
+        print(f"LLM initialization failed: {e}")
+        # Fallback to simple agent approach
+        return create_simple_agents(retriever)
+    
+    try:
+        # CV Research Specialist
+        cv_researcher = Agent(
+            role='CV Research Specialist',
+            goal='Find and extract relevant information from Mohammed Alakhras\'s CV to answer user questions accurately',
+            backstory='''You are an expert at analyzing CVs and finding relevant information. 
+            You have access to Mohammed Alakhras's complete CV and can search through all sections including 
+            Experience, Skills, Certifications, Education, and more. Your job is to find the most relevant 
+            information to answer user questions using the available CV search tools.''',
+            tools=[cv_search, cv_sections, cv_content],
+            llm=llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        
+        # CV Content Analyst
+        cv_analyst = Agent(
+            role='CV Content Analyst', 
+            goal='Analyze and synthesize CV information to provide comprehensive and accurate answers',
+            backstory='''You are a professional CV analyst who specializes in presenting candidate information 
+            in a clear, comprehensive manner. You take the research findings and create well-structured, 
+            accurate responses that highlight relevant qualifications, experience, and skills from Mohammed Alakhras's CV.''',
+            tools=[cv_search, cv_content],
+            llm=llm,
+            verbose=True,
+            allow_delegation=False
+        )
+        
+        print("CrewAI agents initialized successfully")
+        
+        return {
+            'researcher': cv_researcher,
+            'analyst': cv_analyst
+        }
+        
+    except Exception as e:
+        print(f"CrewAI agent creation failed: {e}")
+        return create_simple_agents(retriever)
+
+def create_simple_agents(retriever: CVRetriever):
+    """Fallback simple agent system for CV question answering without crewai dependency."""
+    
     class SimpleAgent:
         def __init__(self, role, goal, backstory, retriever):
             self.role = role
             self.goal = goal
             self.backstory = backstory
             self.retriever = retriever
-            self.llm = None
         
         def process_query(self, question, section=None):
             """Process a query using the retriever."""
@@ -27,7 +88,6 @@ def create_agents(retriever: CVRetriever):
             except Exception as e:
                 return f"Error processing query: {str(e)}"
     
-    # Create simple agents without crewai dependency
     cv_researcher = SimpleAgent(
         role='CV Research Specialist',
         goal='Find and extract relevant information from Mohammed Alakhras\'s CV to answer user questions accurately',
@@ -47,7 +107,7 @@ def create_agents(retriever: CVRetriever):
         retriever=retriever
     )
     
-    print("Simple CV agents initialized successfully (retriever-only mode)")
+    print("Simple CV agents initialized successfully (fallback mode)")
     
     return {
         'researcher': cv_researcher,
