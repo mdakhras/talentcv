@@ -43,9 +43,9 @@ export default function Header() {
 
             {/* Profile Image */}
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/path-to-your-image.jpg" 
+                  src="/sample.png" 
                   alt="Mohammed Alakhras" 
                   className="w-full h-full object-cover rounded-full"
                   onError={(e) => {
@@ -53,8 +53,8 @@ export default function Header() {
                     e.currentTarget.nextElementSibling.style.display = 'flex';
                   }}
                 />
-                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm" style={{display: 'none'}}>
-                  MA
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm rounded-full" style={{display: 'none'}}>
+                  <i className="fas fa-user"></i>
                 </div>
               </div>
               <div className="text-sm text-muted-foreground">

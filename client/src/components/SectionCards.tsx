@@ -113,9 +113,9 @@ export default function SectionCards({ onQuestionClick }: SectionCardsProps) {
         <CardContent className="p-0">
           <div className="flex items-start space-x-4">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-primary/10 border-3 border-primary/30 flex items-center justify-center overflow-hidden">
+              <div className="w-20 h-20 rounded-full bg-gray-200 border-3 border-primary/30 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/path-to-your-image.jpg" 
+                  src="/sample.png" 
                   alt="Mohammed Alakhras" 
                   className="w-full h-full object-cover rounded-full"
                   onError={(e) => {
@@ -123,8 +123,8 @@ export default function SectionCards({ onQuestionClick }: SectionCardsProps) {
                     e.currentTarget.nextElementSibling.style.display = 'flex';
                   }}
                 />
-                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl" style={{display: 'none'}}>
-                  MA
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-full" style={{display: 'none'}}>
+                  <i className="fas fa-user text-3xl"></i>
                 </div>
               </div>
             </div>
