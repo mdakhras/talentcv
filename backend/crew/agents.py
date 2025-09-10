@@ -26,7 +26,7 @@ def create_agents(retriever: CVRetriever):
                 azure_endpoint=endpoint,
                 azure_deployment=os.getenv('AZURE_OPENAI_CHAT_DEPLOYMENT', 'gpt-4o-mini'),
                 api_version=os.getenv('AZURE_OPENAI_API_VERSION', '2024-08-01-preview'),
-                api_key=api_key,
+                openai_api_key=api_key,
                 temperature=0.1,
                 max_tokens=1000
             )
