@@ -16,7 +16,7 @@ export default function Header() {
               <i className="fas fa-robot text-primary-foreground text-lg"></i>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-card-foreground">CV Chatbot</h1>
+              <h1 className="text-xl font-semibold text-card-foreground">Mohammed's CV (AI Agent)</h1>
               <p className="text-sm text-muted-foreground">Interactive Resume Assistant</p>
             </div>
           </div>
@@ -41,8 +41,25 @@ export default function Header() {
               </span>
             </button>
 
-            <div className="text-sm text-muted-foreground">
-              <span>Mohammed Alakhras</span>
+            {/* Profile Image */}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/path-to-your-image.jpg" 
+                  alt="Mohammed Alakhras" 
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm" style={{display: 'none'}}>
+                  MA
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <span>Mohammed Alakhras</span>
+              </div>
             </div>
           </div>
         </div>
