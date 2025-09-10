@@ -1,0 +1,21 @@
+3:37:45 AM [express] GET /api/sections 500 in 56ms :: {"error":"Backend service unavailable","messag…
+C:\Users\moalakhras\AppData\Local\Programs\Python\Python311\Lib\site-packages\crewai\telemetry\telemetry.py:9: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+  import pkg_resources
+C:\Users\moalakhras\AppData\Local\Programs\Python\Python311\Lib\site-packages\pkg_resources\__init__.py:3143: DeprecationWarning: Deprecated call 
+to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+C:\Users\moalakhras\AppData\Local\Programs\Python\Python311\Lib\site-packages\pkg_resources\__init__.py:3143: DeprecationWarning: Deprecated call 
+to `pkg_resources.declare_namespace('google.cloud')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(pkg)
+C:\Users\moalakhras\AppData\Local\Programs\Python\Python311\Lib\site-packages\pkg_resources\__init__.py:2555: DeprecationWarning: Deprecated call 
+to `pkg_resources.declare_namespace('google')`.
+Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+  declare_namespace(parent)
+C:\Users\moalakhras\AppData\Local\Programs\Python\Python311\Lib\site-packages\pydantic\_internal\_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+Failed to initialize Azure OpenAI client: Client.__init__() got an unexpected keyword argument 'proxies'
+Using TF-IDF fallback for retrieval
+Built search index with 31 chunks
+Failed to initialize Azure OpenAI LLM: 1 validation error for AzureChatOpenAI
