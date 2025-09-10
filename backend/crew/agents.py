@@ -1,5 +1,20 @@
 
-from crewai import Agent, LLM
+try:
+    from crewai import Agent
+    # Try to import LLM - handle different CrewAI versions
+    try:
+        from crewai import LLM
+        CREWAI_LLM_AVAILABLE = True
+    except ImportError:
+        from crewai.llm import LLM
+        CREWAI_LLM_AVAILABLE = True
+    except ImportError:
+        CREWAI_LLM_AVAILABLE = False
+    CREWAI_AVAILABLE = True
+except ImportError:
+    CREWAI_AVAILABLE = False
+    CREWAI_LLM_AVAILABLE = False
+
 from crew.tools import cv_search, cv_sections, cv_content, set_retriever
 from retriever import CVRetriever
 import os
@@ -13,17 +28,30 @@ def create_agents(retriever: CVRetriever):
     # Set the global retriever for tools
     set_retriever(retriever)
     
+    if not CREWAI_AVAILABLE:
+        print("CrewAI not available, using simple agents")
+        return create_simple_agents(retriever)
+    
     try:
-        # Try to use OpenAI if available, otherwise use a simple fallback
+        # Try to use OpenAI if available and LLM class is available
+        llm = None
         api_key = os.getenv('OPENAI_API_KEY')
-        if api_key:
-            llm = LLM(
-                model="gpt-3.5-turbo",
-                api_key=api_key
-            )
-        else:
-            # Use a simple LLM configuration for local development
-            llm = LLM(model="ollama/llama2", base_url="http://localhost:11434")
+        
+        if CREWAI_LLM_AVAILABLE and api_key:
+            try:
+                llm = LLM(
+                    model="gpt-3.5-turbo",
+                    api_key=api_key
+                )
+            except Exception as e:
+                print(f"LLM initialization failed: {e}")
+                llm = None
+        
+        # If LLM initialization failed, use simple agents
+        if not llm:
+            print("Using simple agents due to LLM initialization issues")
+            return create_simple_agents(retriever)
+            
     except Exception as e:
         print(f"LLM initialization failed: {e}")
         # Fallback to simple agent approach
@@ -31,31 +59,57 @@ def create_agents(retriever: CVRetriever):
     
     try:
         # CV Research Specialist
-        cv_researcher = Agent(
-            role='CV Research Specialist',
-            goal='Find and extract relevant information from Mohammed Alakhras\'s CV to answer user questions accurately',
-            backstory='''You are an expert at analyzing CVs and finding relevant information. 
-            You have access to Mohammed Alakhras's complete CV and can search through all sections including 
-            Experience, Skills, Certifications, Education, and more. Your job is to find the most relevant 
-            information to answer user questions using the available CV search tools.''',
-            tools=[cv_search, cv_sections, cv_content],
-            llm=llm,
-            verbose=True,
-            allow_delegation=False
-        )
-        
-        # CV Content Analyst
-        cv_analyst = Agent(
-            role='CV Content Analyst', 
-            goal='Analyze and synthesize CV information to provide comprehensive and accurate answers',
-            backstory='''You are a professional CV analyst who specializes in presenting candidate information 
-            in a clear, comprehensive manner. You take the research findings and create well-structured, 
-            accurate responses that highlight relevant qualifications, experience, and skills from Mohammed Alakhras's CV.''',
-            tools=[cv_search, cv_content],
-            llm=llm,
-            verbose=True,
-            allow_delegation=False
-        )
+        if llm:
+            cv_researcher = Agent(
+                role='CV Research Specialist',
+                goal='Find and extract relevant information from Mohammed Alakhras\'s CV to answer user questions accurately',
+                backstory='''You are an expert at analyzing CVs and finding relevant information. 
+                You have access to Mohammed Alakhras's complete CV and can search through all sections including 
+                Experience, Skills, Certifications, Education, and more. Your job is to find the most relevant 
+                information to answer user questions using the available CV search tools.''',
+                tools=[cv_search, cv_sections, cv_content],
+                llm=llm,
+                verbose=True,
+                allow_delegation=False
+            )
+            
+            # CV Content Analyst
+            cv_analyst = Agent(
+                role='CV Content Analyst', 
+                goal='Analyze and synthesize CV information to provide comprehensive and accurate answers',
+                backstory='''You are a professional CV analyst who specializes in presenting candidate information 
+                in a clear, comprehensive manner. You take the research findings and create well-structured, 
+                accurate responses that highlight relevant qualifications, experience, and skills from Mohammed Alakhras's CV.''',
+                tools=[cv_search, cv_content],
+                llm=llm,
+                verbose=True,
+                allow_delegation=False
+            )
+        else:
+            # Create agents without LLM for compatibility
+            cv_researcher = Agent(
+                role='CV Research Specialist',
+                goal='Find and extract relevant information from Mohammed Alakhras\'s CV to answer user questions accurately',
+                backstory='''You are an expert at analyzing CVs and finding relevant information. 
+                You have access to Mohammed Alakhras's complete CV and can search through all sections including 
+                Experience, Skills, Certifications, Education, and more. Your job is to find the most relevant 
+                information to answer user questions using the available CV search tools.''',
+                tools=[cv_search, cv_sections, cv_content],
+                verbose=True,
+                allow_delegation=False
+            )
+            
+            # CV Content Analyst
+            cv_analyst = Agent(
+                role='CV Content Analyst', 
+                goal='Analyze and synthesize CV information to provide comprehensive and accurate answers',
+                backstory='''You are a professional CV analyst who specializes in presenting candidate information 
+                in a clear, comprehensive manner. You take the research findings and create well-structured, 
+                accurate responses that highlight relevant qualifications, experience, and skills from Mohammed Alakhras's CV.''',
+                tools=[cv_search, cv_content],
+                verbose=True,
+                allow_delegation=False
+            )
         
         print("CrewAI agents initialized successfully")
         
