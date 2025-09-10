@@ -115,7 +115,7 @@ export default function SectionCards({ onQuestionClick }: SectionCardsProps) {
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-gray-200 border-3 border-primary/30 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/sample.png" 
+                  src="/mohammed-profile.jpg" 
                   alt="Mohammed Alakhras" 
                   className="w-full h-full object-cover rounded-full"
                   onError={(e) => {

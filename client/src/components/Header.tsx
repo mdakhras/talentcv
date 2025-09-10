@@ -45,7 +45,7 @@ export default function Header() {
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/sample.png" 
+                  src="/mohammed-profile.jpg" 
                   alt="Mohammed Alakhras" 
                   className="w-full h-full object-cover rounded-full"
                   onError={(e) => {
