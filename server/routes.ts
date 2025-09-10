@@ -43,14 +43,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/*', (req, res) => {
     const apiUrl = `http://localhost:8000${req.originalUrl}`;
     
+    // Prepare headers
+    const headers: Record<string, string> = {};
+    
+    // Only set Content-Type for requests with body
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      headers['Content-Type'] = 'application/json';
+    }
+    
     // Forward the request to Flask
     fetch(apiUrl, {
       method: req.method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...req.headers,
-      },
-      body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
+      headers: headers,
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
     })
     .then(response => response.json())
     .then(data => res.json(data))
