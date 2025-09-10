@@ -12,6 +12,9 @@ sys.path.insert(0, str(backend_dir))
 
 from loader import CVLoader
 from retriever import CVRetriever
+from crew.agents import create_agents
+from crew.tasks import create_tasks
+from crewai import Crew
 
 # Load environment variables
 load_dotenv()
