@@ -17,7 +17,7 @@ export default function Header() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-card-foreground">Curriculum Vitae</h1>
-              <p className="text-sm text-muted-foreground">AI-Powered Chat Agent developed by CV Mohammed Alakhras</p>
+              <p className="text-sm text-muted-foreground">AI-Powered Chat Agent - developed by Mohammed Alakhras</p>
             </div>
           </div>
 
