@@ -16,8 +16,8 @@ export default function Header() {
               <i className="fas fa-robot text-primary-foreground text-lg"></i>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-card-foreground">Mohammed's CV (AI Agent)</h1>
-              <p className="text-sm text-muted-foreground">Interactive Resume Assistant</p>
+              <h1 className="text-xl font-semibold text-card-foreground">Curriculum Vitae</h1>
+              <p className="text-sm text-muted-foreground">AI-Powered Chat Agent developed by CV Mohammed Alakhras</p>
             </div>
           </div>
 
