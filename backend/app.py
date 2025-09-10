@@ -171,15 +171,28 @@ def ask_question():
         # Create tasks for this question
         tasks = create_tasks(agents, question, section)
         
-        # Create and run the crew
-        crew = Crew(
-            agents=list(agents.values()),
-            tasks=list(tasks.values()),
-            verbose=True
-        )
+        # Check if we have LLM capabilities
+        has_llm = bool(os.getenv('AZURE_OPENAI_API_KEY') and os.getenv('AZURE_OPENAI_ENDPOINT'))
         
-        # Execute the crew
-        result = crew.kickoff()
+        if has_llm:
+            # Create and run the crew with LLM
+            crew = Crew(
+                agents=list(agents.values()),
+                tasks=list(tasks.values()),
+                verbose=True
+            )
+            
+            # Execute the crew
+            result = crew.kickoff()
+        else:
+            # Fallback: use retriever directly when no LLM is available
+            logger.info("No LLM available, using retriever fallback")
+            context = retriever.get_context_for_query(question, section)
+            
+            if not context or context.strip() == "No relevant information found in the CV.":
+                result = f"I couldn't find specific information about '{question}' in the CV. Please try a different question or check the available sections."
+            else:
+                result = f"Based on the CV information:\n\n{context}"
         
         # Parse the result to extract answer and citations
         answer = str(result)
