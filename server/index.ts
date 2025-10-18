@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 app.use(express.json());
@@ -35,6 +36,19 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Proxy API requests to Flask backend
+  app.use('/api', createProxyMiddleware({
+    target: 'http://0.0.0.0:5001',
+    changeOrigin: true,
+    onError: (err, req, res) => {
+      console.error('Flask API Error:', err);
+      res.status(503).json({ 
+        error: 'Backend service unavailable',
+        message: 'The Flask backend is not responding. Please ensure it is running.'
+      });
+    }
+  }));
 
 (async () => {
   const server = await registerRoutes(app);

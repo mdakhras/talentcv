@@ -261,6 +261,7 @@ if __name__ == '__main__':
     
     logger.info("CV system initialized successfully")
     
-    # Start the Flask app on port 8000 to avoid conflicts
-    port = int(os.environ.get('PORT', 8000))
+    # Start the Flask app on port 5001 to avoid conflicts with the frontend
+    port = int(os.environ.get('FLASK_PORT', 5001))
+    logger.info(f"Starting Flask server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
