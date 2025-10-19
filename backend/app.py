@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from pathlib import Path
-from flasgger import Swagger
 
 # Add backend directory to Python path
 backend_dir = Path(__file__).parent
@@ -41,42 +40,6 @@ CORS(app, origins=[
     "https://*.replit.dev",   # Replit domains
     "https://*.repl.co"       # Replit domains
 ])
-
-# Swagger configuration
-swagger_config = {
-    "headers": [],
-    "specs": [
-        {
-            "endpoint": 'apispec',
-            "route": '/apispec.json',
-            "rule_filter": lambda rule: True,
-            "model_filter": lambda tag: True,
-        }
-    ],
-    "static_url_path": "/flasgger_static",
-    "swagger_ui": True,
-    "specs_route": "/api/docs"
-}
-
-swagger_template = {
-    "swagger": "2.0",
-    "info": {
-        "title": "CV Chatbot API",
-        "description": "API for interacting with Mohammed Alakhras's CV using AI-powered chat",
-        "contact": {
-            "name": "Mohammed Alakhras",
-            "email": "mohammed@example.com"
-        },
-        "version": "1.0.0"
-    },
-    "host": "0.0.0.0:5001",
-    "basePath": "/",
-    "schemes": ["http", "https"],
-    "consumes": ["application/json"],
-    "produces": ["application/json"]
-}
-
-swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
 # Global variables for CV data
 cv_loader = None
@@ -165,56 +128,13 @@ SECTION_QUESTIONS = {
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """
-    Health check endpoint
-    ---
-    tags:
-      - System
-    responses:
-      200:
-        description: System health status
-        schema:
-          type: object
-          properties:
-            status:
-              type: string
-              example: healthy
-    """
+    """Health check endpoint."""
     status = "healthy" if retriever is not None else "initializing"
     return jsonify({"status": status})
 
 @app.route('/api/sections', methods=['GET'])
 def get_sections():
-    """
-    Get all CV sections with excerpts
-    ---
-    tags:
-      - CV Content
-    responses:
-      200:
-        description: List of CV sections with excerpts
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              title:
-                type: string
-                example: Experience
-              excerpt:
-                type: string
-                example: Lead Information Management Officer at IOM Jordan...
-              icon:
-                type: string
-                example: briefcase
-      500:
-        description: Server error
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-    """
+    """Get all CV sections with excerpts."""
     try:
         if not cv_loader:
             return jsonify({"error": "CV system not initialized"}), 500
@@ -228,40 +148,7 @@ def get_sections():
 
 @app.route('/api/questions', methods=['GET'])
 def get_questions():
-    """
-    Get suggested questions for a section or all sections
-    ---
-    tags:
-      - CV Content
-    parameters:
-      - name: section
-        in: query
-        type: string
-        required: false
-        description: Specific CV section to get questions for
-        example: Experience
-    responses:
-      200:
-        description: List of suggested questions
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              question:
-                type: string
-                example: What impact did you deliver at IOM?
-              section:
-                type: string
-                example: Experience
-      500:
-        description: Server error
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-    """
+    """Get suggested questions for a section or all sections."""
     try:
         section = request.args.get('section')
         
@@ -281,65 +168,7 @@ def get_questions():
 
 @app.route('/api/ask', methods=['POST'])
 def ask_question():
-    """
-    Process a question using CrewAI agents
-    ---
-    tags:
-      - Chat
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          required:
-            - question
-          properties:
-            question:
-              type: string
-              example: What are your main technical skills?
-            section:
-              type: string
-              example: Skills
-    responses:
-      200:
-        description: AI-generated answer with citations
-        schema:
-          type: object
-          properties:
-            answer:
-              type: string
-              example: Based on the CV information...
-            citations:
-              type: array
-              items:
-                type: object
-                properties:
-                  section:
-                    type: string
-                    example: Skills
-            sources:
-              type: array
-              items:
-                type: string
-                example: Skills
-      400:
-        description: Invalid request
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-      500:
-        description: Server error
-        schema:
-          type: object
-          properties:
-            error:
-              type: string
-            message:
-              type: string
-    """
+    """Process a question using CrewAI agents."""
     try:
         if not retriever or not agents:
             return jsonify({"error": "CV system not initialized"}), 500
