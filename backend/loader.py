@@ -3,10 +3,6 @@ import markdown
 from bs4 import BeautifulSoup
 from typing import List, Dict, Tuple
 
-import markdown
-from bs4 import BeautifulSoup
-from typing import Dict, List
-
 class CVLoader:
     def __init__(self, file_path: str):
         self.file_path = file_path
@@ -46,80 +42,6 @@ class CVLoader:
                         'content': '\n'.join(current_content),
                         'level': 1 if element.name == 'h1' else 2
                     }
-                
-                # Start new section
-                current_section = element.get_text().strip()
-                current_content = []
-            else:
-                # Add content to current section
-                if current_section:
-                    current_content.append(element.get_text().strip())
-        
-        # Save last section
-        if current_section and current_content:
-            sections[current_section] = {
-                'title': current_section,
-                'content': '\n'.join(current_content),
-                'level': 2
-            }
-        
-        self.sections = sections
-        return sections
-    
-    def get_structured_sections(self):
-        """Get structured sections with title, content, and excerpt for API response."""
-        if not self.sections:
-            self.parse_sections()
-        
-        structured_sections = []
-        for title, data in self.sections.items():
-            content = data.get('content', '')
-            # Create excerpt (first 150 characters)
-            excerpt = content[:150] + '...' if len(content) > 150 else content
-            
-            structured_sections.append({
-                'title': title,
-                'content': content,
-                'excerpt': excerpt,
-                'icon': self._get_section_icon(title)
-            })
-        
-        return structured_sections
-    
-    def _get_section_icon(self, section_title: str) -> str:
-        """Get Font Awesome icon class for a section."""
-        icons = {
-            'Summary': 'fas fa-user-circle',
-            'Experience': 'fas fa-briefcase',
-            'Skills': 'fas fa-code',
-            'Certificates': 'fas fa-certificate',
-            'Languages': 'fas fa-globe',
-            'Memberships': 'fas fa-users',
-            'References': 'fas fa-address-book',
-        }
-        return icons.get(section_title, 'fas fa-file-alt')
-    
-    def get_chunks_for_embedding(self) -> List[Dict]:
-        """Create chunks of content for embedding and retrieval."""
-        if not self.sections:
-            self.parse_sections()
-        
-        chunks = []
-        for title, data in self.sections.items():
-            content = data.get('content', '')
-            
-            # Split content into smaller chunks (by paragraphs or sentences)
-            paragraphs = content.split('\n\n')
-            
-            for i, paragraph in enumerate(paragraphs):
-                if paragraph.strip():
-                    chunks.append({
-                        'section': title,
-                        'content': paragraph.strip(),
-                        'chunk_id': f"{title}_{i}"
-                    })
-        
-        return chunks
                 
                 # Start new section
                 current_section = element.get_text().strip()
